@@ -4,20 +4,66 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quantum Tunneling Simulation</title>
+    <style>
+        body {
+            font-family: Poppins, sans-serif;
+            margin: 0.5;
+            padding: 0.5;
+            background-color: #007A8D;
+        }
+        h1 {
+            text-align: center;
+        }
+        #simulation-container {
+            width: 80%;
+            margin: 0 auto;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to My Quantum Tunneling Simulation!</h1>
-    <p>This project simulates quantum tunneling and the electron's wave function using a Schrödinger's equation.</p>
-    
-    <h2>What is Quantum Tunneling?</h2>
-    <p>Quantum tunneling is a phenomenon where particles, like electrons, pass through a barrier, even if they don’t have enough energy to overcome it.</p> 
-    <p>This happens due to the wave-like nature of particles in quantum mechanics.</p>
+    <h1>Quantum Tunneling Simulation</h1>
+    <div id="simulation-container">
+        <canvas id="wavefunctionCanvas" width="600" height="400"></canvas>
+    </div>
 
-    <h2>Try the Simulation!</h2>
-    <p>The simulation uses the Schrödinger's equation to calculate the behavior of an electron interacting with a barrier.</p>
-    <p>Check out the interactive graph below:</p>
+    <script>
+        // Fetch wavefunction data from the Netlify function
+        fetch("/.netlify/functions/quantum_tunneling")
+            .then(response => response.json())
+            .then(data => {
+                const canvas = document.getElementById('wavefunctionCanvas');
+                const ctx = canvas.getContext('2d');
+                const x = data.x;
+                const real = data.real;
+                const probability = data.probability;
 
-    <!-- Embed your simulation as an iframe or link it -->
-    <iframe src="YOUR_SIMULATION_URL" width="100%" height="500px"></iframe>
+                // Plot the wavefunction and probability density
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Plot real part of wavefunction (blue)
+                ctx.beginPath();
+                ctx.moveTo(0, 200 - real[0] * 50); // Adjust scaling factor
+
+                for (let i = 1; i < x.length; i++) {
+                    ctx.lineTo(i * (canvas.width / x.length), 200 - real[i] * 50);
+                }
+                ctx.strokeStyle = 'blue';
+                ctx.stroke();
+
+                // Plot probability density (red)
+                ctx.beginPath();
+                ctx.moveTo(0, 200 - probability[0] * 200);
+
+                for (let i = 1; i < x.length; i++) {
+                    ctx.lineTo(i * (canvas.width / x.length), 200 - probability[i] * 200);
+                }
+                ctx.strokeStyle = 'red';
+                ctx.stroke();
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+    </script>
 </body>
 </html>
+
