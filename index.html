@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quantum Tunneling Simulation</title>
+    <title>Interactive Quantum Tunneling Simulation</title>
     <style>
         body {
             font-family: Poppins, sans-serif;
@@ -23,6 +23,13 @@
             margin: 20px auto;
             border: 1px solid black;
         }
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .slider-container {
+            margin: 10px;
+        }
     </style>
 </head>
 <body>
@@ -39,6 +46,32 @@
     <p>The simulation uses Schrödinger's equation to calculate the behavior of an electron interacting with a potential barrier.</p>
     <p>Check out the interactive graph below:</p>
 
+    <div class="controls">
+        <div class="slider-container">
+            <label for="energy-slider">Energy (E):</label>
+            <input id="energy-slider" type="range" min="0" max="10" value="4" step="0.1">
+            <span id="energy-value">4.0</span>
+        </div>
+
+        <div class="slider-container">
+            <label for="barrier-height-slider">Barrier Height (V₀):</label>
+            <input id="barrier-height-slider" type="range" min="0" max="10" value="3" step="0.1">
+            <span id="barrier-height-value">3.0</span>
+        </div>
+
+        <div class="slider-container">
+            <label for="barrier-start-slider">Barrier Start (a):</label>
+            <input id="barrier-start-slider" type="range" min="0" max="10" value="4" step="0.1">
+            <span id="barrier-start-value">4.0</span>
+        </div>
+
+        <div class="slider-container">
+            <label for="barrier-end-slider">Barrier End (b):</label>
+            <input id="barrier-end-slider" type="range" min="0" max="10" value="6" step="0.1">
+            <span id="barrier-end-value">6.0</span>
+        </div>
+    </div>
+
     <canvas id="wavefunctionCanvas" width="800" height="400"></canvas>
 
     <script>
@@ -48,7 +81,6 @@
         // Constants
         const hbar = 1.0;  // Reduced Planck's constant (set to 1 for simplicity)
         const m = 1.0;     // Mass of the electron (set to 1 for simplicity)
-        const E = 4.0;     // Energy of the electron
         const L = 10.0;    // Length of the domain
         const N = 1000;    // Number of grid points
         const x = Array.from({ length: N }, (_, i) => (i / (N - 1)) * L);  // Position grid
@@ -58,11 +90,11 @@
             return x.map(position => (position >= a && position <= b) ? V0 : 0);
         }
 
-        // Parameters for the potential barrier
-        const V0 = 3.0;  // Height of the potential barrier
-        const a = 4.0;   // Start of the barrier
-        const b = 6.0;   // End of the barrier
-        const V = potentialBarrier(x, V0, a, b);  // Potential barrier array
+        // Parameters for the potential barrier (default values)
+        let V0 = 3.0;
+        let a = 4.0;
+        let b = 6.0;
+        let E = 4.0;
 
         // Initialize wavefunction (Real part only for simplicity)
         const psi0 = 1.0;  // Initial wavefunction value
@@ -121,8 +153,33 @@
             ctx.stroke();
         }
 
-        plotQuantumTunneling();  // Call the function to plot the simulation
+        // Event listeners to update parameters dynamically
+        document.getElementById("energy-slider").addEventListener("input", (event) => {
+            E = parseFloat(event.target.value);
+            document.getElementById("energy-value").textContent = E.toFixed(1);
+            plotQuantumTunneling();
+        });
 
+        document.getElementById("barrier-height-slider").addEventListener("input", (event) => {
+            V0 = parseFloat(event.target.value);
+            document.getElementById("barrier-height-value").textContent = V0.toFixed(1);
+            plotQuantumTunneling();
+        });
+
+        document.getElementById("barrier-start-slider").addEventListener("input", (event) => {
+            a = parseFloat(event.target.value);
+            document.getElementById("barrier-start-value").textContent = a.toFixed(1);
+            plotQuantumTunneling();
+        });
+
+        document.getElementById("barrier-end-slider").addEventListener("input", (event) => {
+            b = parseFloat(event.target.value);
+            document.getElementById("barrier-end-value").textContent = b.toFixed(1);
+            plotQuantumTunneling();
+        });
+
+        // Initial plot
+        plotQuantumTunneling();
     </script>
 
 </body>
