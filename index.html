@@ -45,144 +45,116 @@
     <p>The simulation uses Schrödinger's equation to calculate the behavior of an electron interacting with a potential barrier.</p>
     <p>Check out the interactive graph below:</p>
 
-    <div class="controls">
-        <div class="slider-container">
-            <label for="energy-slider">Energy (E):</label>
-            <input id="energy-slider" type="range" min="0" max="10" value="4" step="0.1">
-            <span id="energy-value">4.0</span>
-        </div>
-
-        <div class="slider-container">
-            <label for="barrier-height-slider">Barrier Height (V₀):</label>
-            <input id="barrier-height-slider" type="range" min="0" max="10" value="3" step="0.1">
-            <span id="barrier-height-value">3.0</span>
-        </div>
-
-        <div class="slider-container">
-            <label for="barrier-start-slider">Barrier Start (a):</label>
-            <input id="barrier-start-slider" type="range" min="0" max="10" value="4" step="0.1">
-            <span id="barrier-start-value">4.0</span>
-        </div>
-
-        <div class="slider-container">
-            <label for="barrier-end-slider">Barrier End (b):</label>
-            <input id="barrier-end-slider" type="range" min="0" max="10" value="6" step="0.1">
-            <span id="barrier-end-value">6.0</span>
-        </div>
-    </div>
-
-    <canvas id="wavefunctionCanvas" width="800" height="400"></canvas>
-
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist@2.11.1/plotly.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/numeric@1.2.6/numeric.min.js"></script>
+</head>
+<body>
+    <div id="plot"></div>
     <script>
-        const canvas = document.getElementById("wavefunctionCanvas");
-        const ctx = canvas.getContext("2d");
-
         // Constants
-        const hbar = 1.0;  // Reduced Planck's constant (set to 1 for simplicity)
-        const m = 1.0;     // Mass of the electron (set to 1 for simplicity)
-        const L = 10.0;    // Length of the domain
-        const N = 1000;    // Number of grid points
-        const x = Array.from({ length: N }, (_, i) => (i / (N - 1)) * L);  // Position grid
+        const hbar = 1.0;
+        const m = 1.0;
+        const L = 10.0;
+        const N = 1000;
+        const x = numeric.linspace(0, L, N);
 
-        // Define the potential barrier
+        // Potential Barrier Function
         function potentialBarrier(x, V0, a, b) {
-            return x.map(position => (position >= a && position <= b) ? V0 : 0);
+            return x.map(val => (val >= a && val <= b) ? V0 : 0);
         }
 
-        // Parameters for the potential barrier
-        let V0 = 3.0;
-        let a = 4.0;
-        let b = 6.0;
-        let E = 4.0;
-        const V = potentialBarrier(x, V0, a, b);  // Potential barrier array
-
-        // Initialize wavefunction (Real part only for simplicity)
-        const psi0 = 1.0;  // Initial wavefunction value
-        const psi_prime0 = Math.sqrt(2 * m * E) / hbar;  // Initial derivative of the wavefunction
-
-        // Euler method for solving the Schrödinger equation
-        function solveSchrodinger() {
-            let psi = new Array(N).fill(0).map(() => [psi0, psi_prime0]);  // Placeholder for solution
-            let dt = 0.001;  // Time step for Euler method
-            let dx = x[1] - x[0];  // Grid spacing
-
-            // Use Euler method to approximate the solution (simplified)
-            for (let i = 1; i < N - 1; i++) {
-                const psi_val = psi[i][0];
-                const psi_prime_val = psi[i][1];
-                const k_squared = (2 * m * (E - V[i])) / hbar ** 2;
-                
-                // Update using Euler's method
-                psi[i+1][0] = psi[i][0] + dt * psi[i][1];
-                psi[i+1][1] = psi[i][1] - dt * k_squared * psi_val;
-            }
-
-            return psi.map(([real, imag]) => real);  // Only take real part for visualization
+        // Schrödinger Equation
+        function schrodingerEquation(x, psi, E, V) {
+            const psi_val = psi[0];
+            const psi_prime_val = psi[1];
+            const k_squared = 2 * m * (E - V[Math.floor(x / L * (N - 1))]) / hbar ** 2;
+            return [psi_prime_val, -k_squared * psi_val];
         }
 
-        // Plot the results
-        function plotQuantumTunneling() {
-            const psi = solveSchrodinger();
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Quantum Tunneling Simulation
+        function quantumTunnelingSimulation(V0, a, b, E) {
+            const V = potentialBarrier(x, V0, a, b);
 
-            // Plot the potential barrier
-            ctx.beginPath();
-            x.forEach((xi, index) => {
-                const y = V[index];
-                ctx.lineTo((xi / L) * canvas.width, (y / V0) * canvas.height);  // Scale to fit canvas
-            });
-            ctx.strokeStyle = "black";
-            ctx.stroke();
+            // Initial conditions
+            const psi0 = 1.0;
+            const psi_prime0 = 1.0j * Math.sqrt(2 * m * E) / hbar;
 
-            // Plot the real part of the wavefunction
-            ctx.beginPath();
-            x.forEach((xi, index) => {
-                const y = psi[index];
-                ctx.lineTo((xi / L) * canvas.width, (y / Math.max(...psi)) * canvas.height);  // Normalize to fit canvas
+            // Solving Schrödinger equation using numeric.js' ODE solver
+            const solution = numeric.dopri(0, L, [psi0, psi_prime0], function(t, psi) {
+                return schrodingerEquation(t, psi, E, V);
             });
-            ctx.strokeStyle = "blue";
-            ctx.stroke();
 
-            // Plot the probability density |ψ|²
-            ctx.beginPath();
-            x.forEach((xi, index) => {
-                const y = Math.pow(psi[index], 2);
-                ctx.lineTo((xi / L) * canvas.width, (y / Math.max(...psi)) * canvas.height);
-            });
-            ctx.strokeStyle = "red";
-            ctx.stroke();
+            const psi = solution[1];
+            const normPsi = numeric.div(psi, Math.sqrt(numeric.trapz(numeric.pow(numeric.abs(psi), 2), x)));
+
+            // Plotting the results using Plotly
+            const trace1 = {
+                x: x,
+                y: V,
+                type: 'scatter',
+                mode: 'lines',
+                name: 'Potential Barrier',
+                line: { color: 'black', width: 2 }
+            };
+            const trace2 = {
+                x: x,
+                y: numeric.real(normPsi),
+                type: 'scatter',
+                mode: 'lines',
+                name: 'Real(ψ)',
+                line: { color: 'blue', width: 2 }
+            };
+            const trace3 = {
+                x: x,
+                y: numeric.pow(numeric.abs(normPsi), 2),
+                type: 'scatter',
+                mode: 'lines',
+                name: '|ψ|² (Probability Density)',
+                line: { color: 'red', width: 2 }
+            };
+
+            const layout = {
+                title: 'Quantum Tunneling: Wavefunction and Probability Density',
+                xaxis: { title: 'Position (x)' },
+                yaxis: { title: 'Wavefunction / Potential' },
+                showlegend: true,
+                grid: { visible: true },
+                shapes: [{
+                    type: 'rect',
+                    x0: a,
+                    x1: b,
+                    y0: 0,
+                    y1: Math.max(...V),
+                    fillcolor: 'gray',
+                    opacity: 0.3,
+                    line: { width: 0 },
+                    name: 'Barrier Region'
+                }]
+            };
+
+            const data = [trace1, trace2, trace3];
+            Plotly.newPlot('plot', data, layout);
         }
 
-        plotQuantumTunneling();  // Call the function to plot the simulation
+        // GUI controls for interactive parameters
+        const gui = new dat.GUI();
+        const params = {
+            V0: 1.0,
+            a: 0.0,
+            b: 5.0,
+            E: 0.5
+        };
+        gui.add(params, 'V0', 1.0, 10.0, 0.5).onChange(() => quantumTunnelingSimulation(params.V0, params.a, params.b, params.E));
+        gui.add(params, 'a', 0.0, 5.0, 0.5).onChange(() => quantumTunnelingSimulation(params.V0, params.a, params.b, params.E));
+        gui.add(params, 'b', 5.0, 10.0, 0.5).onChange(() => quantumTunnelingSimulation(params.V0, params.a, params.b, params.E));
+        gui.add(params, 'E', 0.5, 10.0, 0.5).onChange(() => quantumTunnelingSimulation(params.V0, params.a, params.b, params.E));
 
-    // Event listeners to update parameters dynamically
-        document.getElementById("energy-slider").addEventListener("input", (event) => {
-            E = parseFloat(event.target.value);
-            document.getElementById("energy-value").textContent = E.toFixed(1);
-            plotQuantumTunneling();
-        });
-
-        document.getElementById("barrier-height-slider").addEventListener("input", (event) => {
-            V0 = parseFloat(event.target.value);
-            document.getElementById("barrier-height-value").textContent = V0.toFixed(1);
-            plotQuantumTunneling();
-        });
-
-        document.getElementById("barrier-start-slider").addEventListener("input", (event) => {
-            a = parseFloat(event.target.value);
-            document.getElementById("barrier-start-value").textContent = a.toFixed(1);
-            plotQuantumTunneling();
-        });
-
-        document.getElementById("barrier-end-slider").addEventListener("input", (event) => {
-            b = parseFloat(event.target.value);
-            document.getElementById("barrier-end-value").textContent = b.toFixed(1);
-            plotQuantumTunneling();
-        });
-
-        // Initial plot
-        plotQuantumTunneling();
+        // Initial simulation
+        quantumTunnelingSimulation(params.V0, params.a, params.b, params.E);
     </script>
-
 </body>
 </html>
