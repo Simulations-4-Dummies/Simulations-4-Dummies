@@ -1,19 +1,19 @@
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f9;
+    font-family: Poppins, sans-serif;
+    margin: 0.5;
+    padding: 0.5;
+    background-color: #007A8D;
 }
 
 header {
-    background-color: #333;
-    color: white;
+    background-color: #607C8E;
+    color: blue;
     padding: 20px;
     text-align: center;
 }
 
 header a {
-    color: #ff9900;
+    color: #607C8E;
     margin: 10px;
     text-decoration: none;
 }
@@ -24,8 +24,8 @@ header a {
 }
 
 footer {
-    background-color: #333;
-    color: white;
+    background-color: #007A8D;
+    color: blue;
     text-align: center;
     padding: 10px;
     position: absolute;
