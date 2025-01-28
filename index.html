@@ -45,15 +45,39 @@
     <p>The simulation uses Schrödinger's equation to calculate the behavior of an electron interacting with a potential barrier.</p>
     <p>Check out the interactive graph below:</p>
 
-<head>
+
+    <div class="controls">
+        <div class="slider-container">
+            <label for="energy-slider">Energy (E):</label>
+            <input id="energy-slider" type="range" min="0" max="10" value="4" step="0.1">
+            <span id="energy-value">4.0</span>
+        </div>
+
+        <div class="slider-container">
+            <label for="barrier-height-slider">Barrier Height (V₀):</label>
+            <input id="barrier-height-slider" type="range" min="0" max="10" value="3" step="0.1">
+            <span id="barrier-height-value">3.0</span>
+        </div>
+
+        <div class="slider-container">
+            <label for="barrier-start-slider">Barrier Start (a):</label>
+            <input id="barrier-start-slider" type="range" min="0" max="10" value="4" step="0.1">
+            <span id="barrier-start-value">4.0</span>
+        </div>
+
+        <div class="slider-container">
+            <label for="barrier-end-slider">Barrier End (b):</label>
+            <input id="barrier-end-slider" type="range" min="0" max="10" value="6" step="0.1">
+            <span id="barrier-end-value">6.0</span>
+      </div>
+        
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist@2.11.1/plotly.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/numeric@1.2.6/numeric.min.js"></script>
-</head>
-<body>
     <div id="plot"></div>
+    
     <script>
         // Constants
         const hbar = 1.0;
