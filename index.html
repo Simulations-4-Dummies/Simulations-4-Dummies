@@ -37,44 +37,8 @@
         <canvas id="wavefunctionCanvas" width="600" height="400"></canvas>
     </div>
 
-    <script>
-        // Fetch wavefunction data from the Netlify function
-        fetch("/.netlify/functions/quantum_tunneling")
-            .then(response => response.json())
-            .then(data => {
-                const canvas = document.getElementById('wavefunctionCanvas');
-                const ctx = canvas.getContext('2d');
-                const x = data.x;
-                const real = data.real;
-                const probability = data.probability;
+  <canvas id="wavefunctionCanvas" width="800" height="400"></canvas>
 
-                // Plot the wavefunction and probability density
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                // Plot real part of wavefunction (blue)
-                ctx.beginPath();
-                ctx.moveTo(0, 200 - real[0] * 50); // Adjust scaling factor
-
-                for (let i = 1; i < x.length; i++) {
-                    ctx.lineTo(i * (canvas.width / x.length), 200 - real[i] * 50);
-                }
-                ctx.strokeStyle = 'blue';
-                ctx.stroke();
-
-                // Plot probability density (red)
-                ctx.beginPath();
-                ctx.moveTo(0, 200 - probability[0] * 200);
-
-                for (let i = 1; i < x.length; i++) {
-                    ctx.lineTo(i * (canvas.width / x.length), 200 - probability[i] * 200);
-                }
-                ctx.strokeStyle = 'red';
-                ctx.stroke();
-            })
-            .catch(error => {
-                console.error('Error fetching data:', error);
-            });
-    </script>
+  <script src="quantum_tunneling.js"></script>
 </body>
 </html>
-
