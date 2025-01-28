@@ -7,9 +7,9 @@
     <style>
         body {
             font-family: Poppins, sans-serif;
-            margin: 0;
+            margin: 2;
             padding: 0;
-            background-color: #8eb1c2;
+            background-color: #608da2;
         }
         h1 {
             text-align: center;
@@ -33,8 +33,7 @@
     </style>
 </head>
 <body>
-
-    <h1>Quantum Tunneling Simulation</h1>
+   <h1>Quantum Tunneling Simulation</h1>
     <h2>Welcome to My Quantum Tunneling Simulation</h2>
     <p>This project simulates quantum tunneling and an electron's wave function using Schrödinger's equation.</p>
     
@@ -90,11 +89,12 @@
             return x.map(position => (position >= a && position <= b) ? V0 : 0);
         }
 
-        // Parameters for the potential barrier (default values)
+        // Parameters for the potential barrier
         let V0 = 3.0;
         let a = 4.0;
         let b = 6.0;
         let E = 4.0;
+        const V = potentialBarrier(x, V0, a, b);  // Potential barrier array
 
         // Initialize wavefunction (Real part only for simplicity)
         const psi0 = 1.0;  // Initial wavefunction value
@@ -153,7 +153,9 @@
             ctx.stroke();
         }
 
-        // Event listeners to update parameters dynamically
+        plotQuantumTunneling();  // Call the function to plot the simulation
+
+    // Event listeners to update parameters dynamically
         document.getElementById("energy-slider").addEventListener("input", (event) => {
             E = parseFloat(event.target.value);
             document.getElementById("energy-value").textContent = E.toFixed(1);
@@ -184,4 +186,3 @@
 
 </body>
 </html>
-
