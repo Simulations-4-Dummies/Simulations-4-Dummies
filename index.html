@@ -7,8 +7,8 @@
     <style>
         body {
             font-family: Poppins, sans-serif;
-            margin: 1;
-            padding: 0.5;
+            margin: 0;
+            padding: 0;
             background-color: #8eb1c2;
         }
         h1 {
@@ -18,11 +18,17 @@
             width: 80%;
             margin: 0 auto;
         }
+        canvas {
+            display: block;
+            margin: 20px auto;
+            border: 1px solid black;
+        }
     </style>
 </head>
 <body>
+
     <h1>Quantum Tunneling Simulation</h1>
-    <h2>Welcome to My Quantum Tunneling Simulation</h1>
+    <h2>Welcome to My Quantum Tunneling Simulation</h2>
     <p>This project simulates quantum tunneling and an electron's wave function using Schrödinger's equation.</p>
     
     <h2>What is Quantum Tunneling?</h2>
@@ -30,93 +36,94 @@
     <p>This happens due to the wave-like nature of particles in quantum mechanics.</p>
 
     <h2>Try the Simulation!</h2>
-    <p>The simulation uses the Schrödinger's equation to calculate the behavior of an electron interacting with a potential barrier.</p>
+    <p>The simulation uses Schrödinger's equation to calculate the behavior of an electron interacting with a potential barrier.</p>
     <p>Check out the interactive graph below:</p>
 
-  <canvas id="wavefunctionCanvas" width="800" height="400"></canvas>
+    <canvas id="wavefunctionCanvas" width="800" height="400"></canvas>
 
-  <script>
-    // Your Quantum Tunneling JavaScript Code
-    const canvas = document.getElementById("wavefunctionCanvas");
-    const ctx = canvas.getContext("2d");
+    <script>
+        const canvas = document.getElementById("wavefunctionCanvas");
+        const ctx = canvas.getContext("2d");
 
-    // Constants for the simulation
-    const hbar = 1.0;  // Reduced Planck's constant (set to 1 for simplicity)
-    const m = 1.0;     // Mass of the electron (set to 1 for simplicity)
-    const E = 4.0;     // Energy of the electron
-    const L = 10.0;    // Length of the domain
-    const N = 1000;    // Number of grid points
-    const x = Array.from({ length: N }, (_, i) => (i / (N - 1)) * L);  // Position grid
+        // Constants
+        const hbar = 1.0;  // Reduced Planck's constant (set to 1 for simplicity)
+        const m = 1.0;     // Mass of the electron (set to 1 for simplicity)
+        const E = 4.0;     // Energy of the electron
+        const L = 10.0;    // Length of the domain
+        const N = 1000;    // Number of grid points
+        const x = Array.from({ length: N }, (_, i) => (i / (N - 1)) * L);  // Position grid
 
-    // Define the potential barrier
-    function potentialBarrier(x, V0, a, b) {
-      return x.map(position => (position >= a && position <= b) ? V0 : 0);
-    }
+        // Define the potential barrier
+        function potentialBarrier(x, V0, a, b) {
+            return x.map(position => (position >= a && position <= b) ? V0 : 0);
+        }
 
-    // Parameters for the potential barrier
-    const V0 = 3.0;  // Height of the potential barrier
-    const a = 4.0;   // Start of the barrier
-    const b = 6.0;   // End of the barrier
-    const V = potentialBarrier(x, V0, a, b);  // Potential barrier array
+        // Parameters for the potential barrier
+        const V0 = 3.0;  // Height of the potential barrier
+        const a = 4.0;   // Start of the barrier
+        const b = 6.0;   // End of the barrier
+        const V = potentialBarrier(x, V0, a, b);  // Potential barrier array
 
-    // Schrödinger equation as a system of first-order ODEs
-    function schrodingerEquation(x, psi, E, V) {
-      const psi_val = psi[0];
-      const psi_prime_val = psi[1];
-      const k_squared = (2 * m * (E - V[Math.floor(x / L * (N - 1))])) / hbar ** 2;
-      return [psi_prime_val, -k_squared * psi_val];
-    }
+        // Initialize wavefunction (Real part only for simplicity)
+        const psi0 = 1.0;  // Initial wavefunction value
+        const psi_prime0 = Math.sqrt(2 * m * E) / hbar;  // Initial derivative of the wavefunction
 
-    // Initial conditions (wavefunction starts as a plane wave)
-    const psi0 = 1.0;
-    const psi_prime0 = 1.0j * Math.sqrt(2 * m * E) / hbar;
+        // Euler method for solving the Schrödinger equation
+        function solveSchrodinger() {
+            let psi = new Array(N).fill(0).map(() => [psi0, psi_prime0]);  // Placeholder for solution
+            let dt = 0.001;  // Time step for Euler method
+            let dx = x[1] - x[0];  // Grid spacing
 
-    // Solve the Schrödinger equation using a numerical solver (simple approximation here)
-    function solveSchrodinger() {
-      let psi = Array(N).fill(0).map(() => [psi0, psi_prime0]);  // Placeholder for solution
-      // You can implement a numerical method to solve the system (e.g., Runge-Kutta)
-      // This part needs to be filled in with your solving method
+            // Use Euler method to approximate the solution (simplified)
+            for (let i = 1; i < N - 1; i++) {
+                const psi_val = psi[i][0];
+                const psi_prime_val = psi[i][1];
+                const k_squared = (2 * m * (E - V[i])) / hbar ** 2;
+                
+                // Update using Euler's method
+                psi[i+1][0] = psi[i][0] + dt * psi[i][1];
+                psi[i+1][1] = psi[i][1] - dt * k_squared * psi_val;
+            }
 
-      return psi.map(([real, imag]) => real);  // Just returning the real part as an example
-    }
+            return psi.map(([real, imag]) => real);  // Only take real part for visualization
+        }
 
-    // Plot the results
-    function plotQuantumTunneling() {
-      const psi = solveSchrodinger();
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.beginPath();
+        // Plot the results
+        function plotQuantumTunneling() {
+            const psi = solveSchrodinger();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Plot the potential barrier
-      ctx.moveTo(0, V0);
-      x.forEach((xi, index) => {
-        const y = V[index];
-        ctx.lineTo((xi / L) * canvas.width, (y / V0) * canvas.height);  // Scaled to fit canvas
-      });
-      ctx.strokeStyle = "black";
-      ctx.stroke();
+            // Plot the potential barrier
+            ctx.beginPath();
+            x.forEach((xi, index) => {
+                const y = V[index];
+                ctx.lineTo((xi / L) * canvas.width, (y / V0) * canvas.height);  // Scale to fit canvas
+            });
+            ctx.strokeStyle = "black";
+            ctx.stroke();
 
-      // Plot the real part of the wavefunction (just as an example)
-      ctx.beginPath();
-      x.forEach((xi, index) => {
-        const y = psi[index];
-        ctx.lineTo((xi / L) * canvas.width, (y / Math.max(...psi)) * canvas.height);  // Normalized to fit canvas
-      });
-      ctx.strokeStyle = "blue";
-      ctx.stroke();
+            // Plot the real part of the wavefunction
+            ctx.beginPath();
+            x.forEach((xi, index) => {
+                const y = psi[index];
+                ctx.lineTo((xi / L) * canvas.width, (y / Math.max(...psi)) * canvas.height);  // Normalize to fit canvas
+            });
+            ctx.strokeStyle = "blue";
+            ctx.stroke();
 
-      // Probability density |ψ|² (for visualization)
-      ctx.beginPath();
-      x.forEach((xi, index) => {
-        const y = Math.pow(psi[index], 2);
-        ctx.lineTo((xi / L) * canvas.width, (y / Math.max(...psi)) * canvas.height);
-      });
-      ctx.strokeStyle = "red";
-      ctx.stroke();
-    }
+            // Plot the probability density |ψ|²
+            ctx.beginPath();
+            x.forEach((xi, index) => {
+                const y = Math.pow(psi[index], 2);
+                ctx.lineTo((xi / L) * canvas.width, (y / Math.max(...psi)) * canvas.height);
+            });
+            ctx.strokeStyle = "red";
+            ctx.stroke();
+        }
 
-    plotQuantumTunneling();  // Call the function to plot the simulation
+        plotQuantumTunneling();  // Call the function to plot the simulation
 
-  </script>
+    </script>
 
 </body>
 </html>
