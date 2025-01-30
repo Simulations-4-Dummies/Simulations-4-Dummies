@@ -44,141 +44,99 @@
     <h2>Try the Simulation!</h2>
     <p>The simulation uses Schrödinger's equation to calculate the behavior of an electron interacting with a potential barrier.</p>
     <p>Check out the interactive graph below:</p>
-
-
-    <div class="controls">
-        <div class="slider-container">
-            <label for="energy-slider">Energy (E):</label>
-            <input id="energy-slider" type="range" min="0" max="10" value="4" step="0.1">
-            <span id="energy-value">4.0</span>
-        </div>
-
-        <div class="slider-container">
-            <label for="barrier-height-slider">Barrier Height (V₀):</label>
-            <input id="barrier-height-slider" type="range" min="0" max="10" value="3" step="0.1">
-            <span id="barrier-height-value">3.0</span>
-        </div>
-
-        <div class="slider-container">
-            <label for="barrier-start-slider">Barrier Start (a):</label>
-            <input id="barrier-start-slider" type="range" min="0" max="10" value="4" step="0.1">
-            <span id="barrier-start-value">4.0</span>
-        </div>
-
-        <div class="slider-container">
-            <label for="barrier-end-slider">Barrier End (b):</label>
-            <input id="barrier-end-slider" type="range" min="0" max="10" value="6" step="0.1">
-            <span id="barrier-end-value">6.0</span>
-      </div>
-        
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist@2.11.1/plotly.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/numeric@1.2.6/numeric.min.js"></script>
-    <div id="plot"></div>
     
-    <script>
-        // Constants
-        const hbar = 1.0;
-        const m = 1.0;
-        const L = 10.0;
-        const N = 1000;
-        const x = numeric.linspace(0, L, N);
+<div class="controls" style="text-align: center;"><em><span
+    style="font-family: 'trebuchet ms', geneva, sans-serif;"><label>Barrier
+        Height (V<sub>0</sub>): <input type="range" id="V0"
+        min="1" max="10" step="0.5" value="3"></label><span
+      style="background-color: #236fa1;"> </span></span></em>
+</div>
+<div class="controls" style="text-align: center;"><em><span
+    style="font-family: 'trebuchet ms', geneva, sans-serif;"><label>Barrier
+        Start (a):&nbsp;<input type="range" id="a" min="2"
+        max="5" step="0.5" value="4"></label> </span></em></div>
+<div class="controls" style="text-align: center;"><em><span
+    style="font-family: 'trebuchet ms', geneva, sans-serif;"><label>Barrier
+        End (b):&nbsp;<input type="range" id="b" min="5" max="8"
+        step="0.5" value="6"></label> </span></em></div>
+<div class="controls" style="text-align: center;">
+  <label><em><span
+      style="font-family: 'trebuchet ms', geneva, sans-serif;">Electron
+        Energy (E):</span>&nbsp;</em><input type="range" id="E"
+    min="0.5" max="10" step="0.5" value="4"></label></div>
+<p><canvas id="wavefunctionCanvas" width="800"
+  height="400"></canvas></p>
+<p>
+  <script>
+    const canvas = document.getElementById(
+      "wavefunctionCanvas");
+    const ctx = canvas.getContext("2d");
+    const hbar = 1.0;
+    const m = 1.0;
+    const L = 10.0;
+    const N = 500;
+    const x = Array.from({
+      length: N
+    }, (_, i) => (i / (N - 1)) * L);
 
-        // Potential Barrier Function
-        function potentialBarrier(x, V0, a, b) {
-            return x.map(val => (val >= a && val <= b) ? V0 : 0);
-        }
+    function potentialBarrier(x, V0, a, b) {
+      return x.map(pos => (pos >= a && pos <= b) ? V0 : 0);
+    }
 
-        // Schrödinger Equation
-        function schrodingerEquation(x, psi, E, V) {
-            const psi_val = psi[0];
-            const psi_prime_val = psi[1];
-            const k_squared = 2 * m * (E - V[Math.floor(x / L * (N - 1))]) / hbar ** 2;
-            return [psi_prime_val, -k_squared * psi_val];
-        }
+    function schrodingerEquation(x, psi, E, V) {
+      let k_squared = (2 * m * (E - V[Math.floor(x / L * (N -
+        1))])) / hbar ** 2;
+      return [psi[1], -k_squared * psi[0]];
+    }
 
-        // Quantum Tunneling Simulation
-        function quantumTunnelingSimulation(V0, a, b, E) {
-            const V = potentialBarrier(x, V0, a, b);
+    function solveSchrodinger(V0, a, b, E) {
+      const V = potentialBarrier(x, V0, a, b);
+      let psi = Array(N).fill([1.0, 0.0]);
+      for (let i = 1; i < N; i++) {
+        let k_squared = (2 * m * (E - V[i])) / hbar ** 2;
+        psi[i] = [psi[i - 1][0] + psi[i - 1][1] * 0.01, psi[
+          i - 1][1] - k_squared * psi[i - 1][0] * 0.01];
+      }
+      return psi.map(p => p[0]);
+    }
 
-            // Initial conditions
-            const psi0 = 1.0;
-            const psi_prime0 = 1.0j * Math.sqrt(2 * m * E) / hbar;
-
-            // Solving Schrödinger equation using numeric.js' ODE solver
-            const solution = numeric.dopri(0, L, [psi0, psi_prime0], function(t, psi) {
-                return schrodingerEquation(t, psi, E, V);
-            });
-
-            const psi = solution[1];
-            const normPsi = numeric.div(psi, Math.sqrt(numeric.trapz(numeric.pow(numeric.abs(psi), 2), x)));
-
-            // Plotting the results using Plotly
-            const trace1 = {
-                x: x,
-                y: V,
-                type: 'scatter',
-                mode: 'lines',
-                name: 'Potential Barrier',
-                line: { color: 'black', width: 2 }
-            };
-            const trace2 = {
-                x: x,
-                y: numeric.real(normPsi),
-                type: 'scatter',
-                mode: 'lines',
-                name: 'Real(ψ)',
-                line: { color: 'blue', width: 2 }
-            };
-            const trace3 = {
-                x: x,
-                y: numeric.pow(numeric.abs(normPsi), 2),
-                type: 'scatter',
-                mode: 'lines',
-                name: '|ψ|² (Probability Density)',
-                line: { color: 'red', width: 2 }
-            };
-
-            const layout = {
-                title: 'Quantum Tunneling: Wavefunction and Probability Density',
-                xaxis: { title: 'Position (x)' },
-                yaxis: { title: 'Wavefunction / Potential' },
-                showlegend: true,
-                grid: { visible: true },
-                shapes: [{
-                    type: 'rect',
-                    x0: a,
-                    x1: b,
-                    y0: 0,
-                    y1: Math.max(...V),
-                    fillcolor: 'gray',
-                    opacity: 0.3,
-                    line: { width: 0 },
-                    name: 'Barrier Region'
-                }]
-            };
-
-            const data = [trace1, trace2, trace3];
-            Plotly.newPlot('plot', data, layout);
-        }
-
-        // GUI controls for interactive parameters
-        const gui = new dat.GUI();
-        const params = {
-            V0: 1.0,
-            a: 0.0,
-            b: 5.0,
-            E: 0.5
-        };
-        gui.add(params, 'V0', 1.0, 10.0, 0.5).onChange(() => quantumTunnelingSimulation(params.V0, params.a, params.b, params.E));
-        gui.add(params, 'a', 0.0, 5.0, 0.5).onChange(() => quantumTunnelingSimulation(params.V0, params.a, params.b, params.E));
-        gui.add(params, 'b', 5.0, 10.0, 0.5).onChange(() => quantumTunnelingSimulation(params.V0, params.a, params.b, params.E));
-        gui.add(params, 'E', 0.5, 10.0, 0.5).onChange(() => quantumTunnelingSimulation(params.V0, params.a, params.b, params.E));
-
-        // Initial simulation
-        quantumTunnelingSimulation(params.V0, params.a, params.b, params.E);
-    </script>
+    function plotQuantumTunneling() {
+      const V0 = parseFloat(document.getElementById("V0")
+        .value);
+      const a = parseFloat(document.getElementById("a")
+        .value);
+      const b = parseFloat(document.getElementById("b")
+        .value);
+      const E = parseFloat(document.getElementById("E")
+        .value);
+      const psi = solveSchrodinger(V0, a, b, E);
+      const V = potentialBarrier(x, V0, a, b);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.beginPath();
+      ctx.moveTo(0, canvas.height - V[0] * 30);
+      x.forEach((xi, index) => {
+        let y = canvas.height - V[index] * 30;
+        ctx.lineTo((xi / L) * canvas.width, y);
+      });
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, canvas.height / 2);
+      x.forEach((xi, index) => {
+        let y = canvas.height / 2 - psi[index] * 50;
+        ctx.lineTo((xi / L) * canvas.width, y);
+      });
+      ctx.strokeStyle = "blue";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+    document.querySelectorAll("input").forEach(input => {
+      input.addEventListener("input",
+      plotQuantumTunneling);
+    });
+    plotQuantumTunneling();
+  </script>
+</p>
 </body>
 </html>
