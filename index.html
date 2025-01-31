@@ -6,7 +6,7 @@
         body {
             font-family: trebuchet ms, sans-serif;
             margin: 3;
-            padding: 0;
+            padding: 4;
             background-color: #608da2;
         }
     </style>
@@ -27,32 +27,32 @@
 <div class="controls" style="text-align: center;"><em><span
     style="font-family: 'trebuchet ms', geneva, sans-serif;"><label>Barrier
         Height (V<sub>0</sub>): <input type="range" id="V0"
-        min="1" max="10" step="0.5" value="3"></label><span
+        min="1" max="10" step="0.25" value="3"></label><span
       style="background-color: #236fa1;"> </span></span></em>
 </div>
 <div class="controls" style="text-align: center;"><em><span
     style="font-family: 'trebuchet ms', geneva, sans-serif;"><label>Barrier
         Start (a):&nbsp;<input type="range" id="a" min="2"
-        max="5" step="0.5" value="4"></label> </span></em></div>
+        max="5" step="0.25" value="4"></label> </span></em></div>
 <div class="controls" style="text-align: center;"><em><span
     style="font-family: 'trebuchet ms', geneva, sans-serif;"><label>Barrier
         End (b):&nbsp;<input type="range" id="b" min="5" max="8"
-        step="0.5" value="6"></label> </span></em></div>
+        step="0.25" value="6"></label> </span></em></div>
 <div class="controls" style="text-align: center;">
   <label><em><span
       style="font-family: 'trebuchet ms', geneva, sans-serif;">Electron
         Energy (E):</span>&nbsp;</em><input type="range" id="E"
-    min="0.5" max="10" step="0.5" value="4"></label></div>
-<p><canvas id="wavefunctionCanvas" width="800"
+    min="0.5" max="10" step="0.25" value="4"></label></div>
+<p><canvas id="wavefunctionCanvas" width="1000"
   height="400"></canvas></p>
 <p>
  <style>
     #wavefunctionCanvas {
     display: block;
     margin: 20px auto;
-    border: 2px solid black;
+    border: 3px solid black;
     background-color: white;
-    width: 800px;
+    width: 1000px;
     height: 400px;
     }
 
@@ -60,7 +60,7 @@
     display: flex;
     justify-content: center;  /* Centers horizontally */
     align-items: center;  /* Centers vertically if needed */
-    height: 100vh;  /* Makes sure it takes the full screen height */
+    height: 150vh;  /* Makes sure it takes the full screen height */
     }
     </style>
     
@@ -135,5 +135,9 @@
     plotQuantumTunneling();
   </script>
 </p>
+
+    <h2>Explanation</h2>
+    <p>Quantum tunneling is </p>
+    
 </body>
 </html>
