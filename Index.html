@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Interactive Quantum Tunneling Simulation</title>
+    <style>
+        body {
+            font-family: trebuchet ms, sans-serif;
+            margin: 3;
+            padding: 10;
+            background-color: #87CEEB;
+        }
+
+        #wavefunctionCanvas {
+            display: block;
+            margin: 20px auto;
+            border: 10px solid black;
+            background-color: white;
+            width: 1000px;
+            height: 500px;
+        }
+
+        .controls {
+            text-align: center;
+        }
+
+        #graph-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 150vh;
+        }
+    </style>
+</head>
+<body>
+   <h1>Quantum Tunneling Simulation</h1>
+    <h2>Welcome to My Quantum Tunneling Simulation</h2>
+    <p>This project simulates quantum tunneling and an electron's wave function using Schrödinger's equation.</p>
+    
+    <h2>What is Quantum Tunneling?</h2>
+    <p>Quantum tunneling is a phenomenon where particles, like electrons, pass through a barrier, even if they don’t have enough energy to overcome it.</p>
+    <p>This happens due to the wave-like nature of particles in quantum mechanics.</p>
+
+    <h2>Try the Simulation!</h2>
+    <p>The simulation uses Schrödinger's equation to calculate the behavior of an electron interacting with a potential barrier.</p>
+    <p>Check out the interactive graph below:</p>
+    
+<div class="controls">
+    <label>Barrier Height (V<sub>0</sub>): <input type="range" id="V0" min="1" max="10" step="0.25" value="3"></label>
+</div>
+<div class="controls">
+    <label>Barrier Start (a): <input type="range" id="a" min="2" max="5" step="0.25" value="4"></label>
+</div>
+<div class="controls">
+    <label>Barrier End (b): <input type="range" id="b" min="5" max="8" step="0.25" value="6"></label>
+</div>
+<div class="controls">
+    <label>Electron Energy (E): <input type="range" id="E" min="0.5" max="10" step="0.25" value="4"></label>
+</div>
+
+<p><canvas id="wavefunctionCanvas" width="1000" height="500"></canvas></p>
+
+<script>
+    // Constants and variables
+    const canvas = document.getElementById("wavefunctionCanvas");
+    const ctx = canvas.getContext("2d");
+    const hbar = 1.0; // Reduced Planck's constant (arbitrary units)
+    const m = 1.0; // Mass of the particle (arbitrary units)
+    const L = 10.0; // Length of the region (arbitrary units)
+    const N = 500; // Number of grid points
+    const x = Array.from({ length: N }, (_, i) => (i / (N - 1)) * L); // Position grid
+
+    // Potential Barrier Function
+    function potentialBarrier(x, V0, a, b) {
+        return x.map(pos => (pos >= a && pos <= b) ? V0 : 0);
+    }
+
+    // Solve the Schrödinger equation using the finite difference method
+    function solveSchrodinger(V0, a, b, E) {
+        const V = potentialBarrier(x, V0, a, b);
+        let psi = Array(N).fill([1.0, 0.0]);
+
+        for (let i = 1; i < N; i++) {
+            let k_squared = (2 * m * (E - V[i])) / hbar ** 2;
+            psi[i] = [
+                psi[i - 1][0] + psi[i - 1][1] * 0.01, 
+                psi[i - 1][1] - k_squared * psi[i - 1][0] * 0.01
+            ];
+        }
+
+        // Normalize the wavefunction
+        const maxPsi = Math.max(...psi.map(p => Math.abs(p[0])));
+        return psi.map(p => p[0] / maxPsi);  // Normalize to max amplitude of 1
+    }
+
+    // Plot the potential and the wavefunction on the canvas
+    function plotQuantumTunneling() {
+        const V0 = parseFloat(document.getElementById("V0").value);
+        const a = parseFloat(document.getElementById("a").value);
+        const b = parseFloat(document.getElementById("b").value);
+        const E = parseFloat(document.getElementById("E").value);
+        const psi = solveSchrodinger(V0, a, b, E);
+        const V = potentialBarrier(x, V0, a, b);
+
+        // Clear the canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Plot the potential barrier
+        ctx.beginPath();
+        ctx.moveTo(0, canvas.height - V[0] * 30);
+        x.forEach((xi, index) => {
+            let y = canvas.height - V[index] * 30;
+            ctx.lineTo((xi / L) * canvas.width, y);
+        });
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Plot the wavefunction (psi)
+        ctx.beginPath();
+        ctx.moveTo(0, canvas.height / 2);
+        x.forEach((xi, index) => {
+            let y = canvas.height / 2 - psi[index] * 50;
+            ctx.lineTo((xi / L) * canvas.width, y);
+        });
+        ctx.strokeStyle = "blue";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    }
+
+    // Set up event listeners for input elements
+    document.querySelectorAll("input").forEach(input => {
+        input.addEventListener("input", plotQuantumTunneling);
+    });
+
+    // Initial plot
+    plotQuantumTunneling();
+</script>
+
+<h2>Explanation of Quantum Tunneling</h2>
+<p>Quantum tunneling is a phenomenon where particles, like electrons, "tunnel" or move through a barrier...</p>
+</body>
+</html>
