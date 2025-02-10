@@ -9,7 +9,44 @@
             padding: 10;
             background-color: #87CEEB;
         }
+    </style>
+</head>
+<body>
+   <h1>Quantum Tunneling Simulation</h1>
+    <h2>Welcome to My Quantum Tunneling Simulation</h2>
+    <p>This project simulates quantum tunneling and an electron's wave function using Schrödinger's equation.</p>
+    
+    <h2>What is Quantum Tunneling?</h2>
+    <p>Quantum tunneling is a phenomenon where particles, like electrons, pass through a barrier, even if they don’t have enough energy to overcome it.</p>
+    <p>This happens due to the wave-like nature of particles in quantum mechanics.</p>
 
+    <h2>Try the Simulation!</h2>
+    <p>The simulation uses Schrödinger's equation to calculate the behavior of an electron interacting with a potential barrier.</p>
+    <p>Check out the interactive graph below:</p>
+    
+<div class="controls" style="text-align: center;"><em><span
+    style="font-family: 'trebuchet ms', geneva, sans-serif;"><label>Barrier
+        Height (V<sub>0</sub>): <input type="range" id="V0"
+        min="1" max="10" step="0.25" value="3"></label><span
+      style="background-color: #236fa1;"> </span></span></em>
+</div>
+<div class="controls" style="text-align: center;"><em><span
+    style="font-family: 'trebuchet ms', geneva, sans-serif;"><label>Barrier
+        Start (a):&nbsp;<input type="range" id="a" min="2"
+        max="5" step="0.25" value="4"></label> </span></em></div>
+<div class="controls" style="text-align: center;"><em><span
+    style="font-family: 'trebuchet ms', geneva, sans-serif;"><label>Barrier
+        End (b):&nbsp;<input type="range" id="b" min="5" max="8"
+        step="0.25" value="6"></label> </span></em></div>
+<div class="controls" style="text-align: center;">
+  <label><em><span
+      style="font-family: 'trebuchet ms', geneva, sans-serif;">Electron
+        Energy (E):</span>&nbsp;</em><input type="range" id="E"
+    min="0.5" max="10" step="0.25" value="4"></label></div>
+<p><canvas id="wavefunctionCanvas" width="1000"
+  height="400"></canvas></p>
+<p>
+    </style>
         #wavefunctionCanvas {
             display: block;
             margin: 20px auto;
