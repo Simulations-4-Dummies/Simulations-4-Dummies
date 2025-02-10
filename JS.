@@ -1,0 +1,61 @@
+function solveSchrodinger(V0, a, b, E) {
+    const V = potentialBarrier(x, V0, a, b);
+    let psi = Array(N).fill([1.0, 0.0]);
+
+    // Numerically solve the Schrödinger equation using the finite difference method
+    for (let i = 1; i < N; i++) {
+        let k_squared = (2 * m * (E - V[i])) / hbar ** 2;
+        psi[i] = [
+            psi[i - 1][0] + psi[i - 1][1] * 0.01, 
+            psi[i - 1][1] - k_squared * psi[i - 1][0] * 0.01
+        ];
+    }
+
+    // Normalize the wavefunction
+    const maxPsi = Math.max(...psi.map(p => Math.abs(p[0])));
+    return psi.map(p => p[0] / maxPsi);  // Normalize to max amplitude of 1
+}
+
+function plotQuantumTunneling() {
+    const V0 = parseFloat(document.getElementById("V0").value);
+    const a = parseFloat(document.getElementById("a").value);
+    const b = parseFloat(document.getElementById("b").value);
+    const E = parseFloat(document.getElementById("E").value);
+    const psi = solveSchrodinger(V0, a, b, E);
+    const V = potentialBarrier(x, V0, a, b);
+
+    // Clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Plot the potential barrier
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height - V[0] * 30);
+    x.forEach((xi, index) => {
+        let y = canvas.height - V[index] * 30;
+        ctx.lineTo((xi / L) * canvas.width, y);
+    });
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Plot the wavefunction (psi)
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height / 2);
+    x.forEach((xi, index) => {
+        let y = canvas.height / 2 - psi[index] * 50;
+        ctx.lineTo((xi / L) * canvas.width, y);
+    });
+    ctx.strokeStyle = "blue";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+}
+
+
+
+
+
+
+
+
+
+
